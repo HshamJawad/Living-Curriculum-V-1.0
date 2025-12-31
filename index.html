@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Supported Activity Sheet</title>
+
+  <style>
+    * { box-sizing: border-box; }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 24px 20px;
+      margin: 0;
+      color: #1a1a1a;
+      line-height: 1.5;
+    }
+    
+    .activity { 
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 8px;
+      max-width: 980px;
+      margin: 0 auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    
+    h1 { 
+      margin: 0 0 6px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+    
+    .lang-toggle {
+      display: flex;
+      gap: 0;
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 2px;
+    }
+    
+    .lang-btn {
+      padding: 6px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.2s;
+    }
+    
+    .lang-btn.active {
+      background: #ffffff;
+      color: #1a1a1a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    
+    .step { 
+      border: 1px solid #e0e0e0;
+      padding: 24px;
+      border-radius: 8px;
+      margin: 20px 0;
+      background: #fafafa;
+    }
+    
+    .step-title { 
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+    
+    .step > p {
+      margin: 0 0 16px;
+      color: #4a4a4a;
+      font-size: 14px;
+    }
+    
+    .row { 
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    
+    button.primary {
+      background: #2d2d2d;
+      color: #ffffff;
+      border-color: #2d2d2d;
+    }
+    
+    button.primary:hover:not(:disabled) {
+      background: #1a1a1a;
+      border-color: #1a1a1a;
+    }
+    
+    button.secondary {
+      background: #ffffff;
+      color: #2d2d2d;
+    }
+    
+    button.secondary:hover:not(:disabled) {
+      background: #f5f5f5;
+    }
+    
+    button.success {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #16a34a;
+    }
+    
+    button.success:hover:not(:disabled) {
+      background: #15803d;
+      border-color: #15803d;
+    }
+    
+    button.danger {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+    
+    button.danger:hover:not(:disabled) {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .box { 
+      margin-top: 16px;
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .imgwrap { 
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .imgwrap img { 
+      width: 100%;
+      max-width: 100%;
+      border-radius: 6px;
+      display: block;
+    }
+    
+    .loading { 
+      font-style: italic;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .guidance {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #d0d0d0;
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+    
+    .guidance:focus {
+      outline: none;
+      border-color: #2d2d2d;
+    }
+    
+    .label {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .criteria { 
+      margin-top: 16px;
+    }
+    
+    .criteria-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    
+    .criteria-header strong {
+      font-size: 15px;
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    
+    .criteria-header .label {
+      margin: 4px 0 0;
+    }
+    
+    .criteria-item { 
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .criteria-item:last-child { 
+      border-bottom: none;
+    }
+    
+    .criteria-item label { 
+      flex: 1;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+    }
+    
+    .criteria-item input[type="checkbox"] {
+      margin-top: 2px;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+    
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      background: #f0f0f0;
+      border: 1px solid #e0e0e0;
+      font-weight: 600;
+    }
+    
+    .feedback { 
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 14px;
+      color: #333;
+      font-family: inherit;
+    }
+    
+    .footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e5e5;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* RTL Support */
+    [dir="rtl"] {
+      text-align: right;
+    }
+    
+    [dir="rtl"] .header {
+      flex-direction: row-reverse;
+    }
+    
+    [dir="rtl"] .row {
+      flex-direction: row-reverse;
+    }
+    
+    [dir="rtl"] .criteria-item {
+      flex-direction: row-reverse;
+    }
+    
+    [dir="rtl"] .criteria-header {
+      flex-direction: row-reverse;
+    }
+  </style>
+</head>
+<body>
+
+<div class="activity">
+  <div class="header">
+    <div>
+      <h1 data-i18n="title">Activity Sheet</h1>
+      <p class="subtitle" data-i18n="subtitle">Living Curriculum Prototype</p>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">English</button>
+      <button class="lang-btn" data-lang="ar">العربية</button>
+    </div>
+  </div>
+ <!-- HOW TO USE -->
+<div class="box" style="margin-bottom:24px;">
+<strong data-i18n="howto_title">How to use</strong>
+  <ol style="margin-top:12px; padding-inline-start:20px; line-height:1.8;" data-i18n="howto_list">
+    <li>Read the activity step carefully.</li>
+    <li>Click <b>Generate Illustration</b> to create a visual explanation.</li>
+    <li>If the image is unclear, click <b>Suggest Guidance</b>.</li>
+    <li>Optionally edit the guidance, then click <b>Regenerate with Guidance</b>.</li>
+    <li>When satisfied, click <b>Save Image</b>.</li>
+    <li>Review the image using the <b>Performance Criteria</b>.</li>
+    <li>Use <b>Delete Image</b> or <b>Clear</b> to remove saved outputs.</li>
+    <li>Switch language anytime using the EN / AR buttons.</li>
+  </ol>
+</div>
+
+  <!-- STEP 1 -->
+  <div class="step" data-occupation="electrician" data-task="turn off main power supply">
+    <div class="step-title" data-i18n="step1_title">Step 1: Turn off the main power supply</div>
+    <p data-i18n="step1_desc">Ensure the electrical supply is disconnected before starting work.</p>
+
+    <div class="box">
+      <div class="row">
+        <button class="primary" onclick="generateIllustration(this)" data-i18n="btn_generate">Generate Illustration</button>
+        <button class="secondary" onclick="regenerateWithGuidance(this)" data-i18n="btn_regenerate">Regenerate with Guidance</button>
+        <button class="secondary" onclick="suggestGuidance(this)" data-i18n="btn_suggest">Suggest Guidance</button>
+        <button class="success" onclick="saveStepImage(this)" data-i18n="btn_save">Save Image</button>
+        <button class="danger delete-img-btn" onclick="deleteStepImage(this)" data-i18n="btn_delete" style="display:none;">Delete Image</button>
+        <button class="danger" onclick="clearOutputs(this)" data-i18n="btn_clear">Clear</button>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="label" data-i18n="label_guidance">Guidance (optional):</div>
+        <textarea class="guidance" data-i18n-placeholder="placeholder_guidance"></textarea>
+      </div>
+
+      <div class="box imgwrap" style="margin-top:16px;">
+        <div class="loading" data-i18n="no_image">No image generated yet.</div>
+      </div>
+    </div>
+
+    <div class="box criteria">
+      <div class="criteria-header">
+        <div>
+          <strong data-i18n="criteria_title">Performance Criteria (Self-check)</strong>
+          <div class="label" data-i18n="criteria_subtitle">Check each item after viewing the illustration and reading the step.</div>
+        </div>
+      </div>
+
+      <div class="criteria-list">
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step1_c1">Confirmed main power is OFF before starting work (safety first).</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step1_c2">Used correct PPE (e.g., insulated gloves) and safe posture.</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step1_c3">Identified the correct breaker/switch (avoids turning off the wrong circuit).</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step1_c4">Area and panel are clearly visible and hazard-free (no exposed conductors shown).</label>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:16px;">
+        <button class="secondary" onclick="checkAgainstCriteria(this)" data-i18n="btn_check">Check against Performance Criteria</button>
+        <div class="score-pill">
+          <span data-i18n="label_score">Score:</span>
+          <span class="score">0%</span>
+        </div>
+      </div>
+
+      <div class="box feedback" style="margin-top:16px;">
+        <div class="loading" data-i18n="feedback_placeholder">Feedback will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" data-occupation="electrician" data-task="prepare socket box and wires">
+    <div class="step-title" data-i18n="step2_title">Step 2: Prepare the socket box and wires</div>
+    <p data-i18n="step2_desc">Strip the wires and prepare the socket box according to standards.</p>
+
+    <div class="box">
+      <div class="row">
+        <button class="primary" onclick="generateIllustration(this)" data-i18n="btn_generate">Generate Illustration</button>
+        <button class="secondary" onclick="regenerateWithGuidance(this)" data-i18n="btn_regenerate">Regenerate with Guidance</button>
+        <button class="secondary" onclick="suggestGuidance(this)" data-i18n="btn_suggest">Suggest Guidance</button>
+        <button class="success" onclick="saveStepImage(this)" data-i18n="btn_save">Save Image</button>
+        <button class="danger delete-img-btn" onclick="deleteStepImage(this)" data-i18n="btn_delete" style="display:none;">Delete Image</button>
+        <button class="danger" onclick="clearOutputs(this)" data-i18n="btn_clear">Clear</button>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="label" data-i18n="label_guidance">Guidance (optional):</div>
+        <textarea class="guidance" data-i18n-placeholder="placeholder_guidance"></textarea>
+      </div>
+
+      <div class="box imgwrap" style="margin-top:16px;">
+        <div class="loading" data-i18n="no_image">No image generated yet.</div>
+      </div>
+    </div>
+
+    <div class="box criteria">
+      <div class="criteria-header">
+        <div>
+          <strong data-i18n="criteria_title">Performance Criteria (Self-check)</strong>
+          <div class="label" data-i18n="criteria_subtitle">Check each item after viewing the illustration and reading the step.</div>
+        </div>
+      </div>
+
+      <div class="criteria-list">
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step2_c1">Selected correct tools (e.g., wire stripper) and used them safely.</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step2_c2">Stripped insulation to appropriate length without nicking conductors.</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step2_c3">Socket box is positioned/secured correctly (level and stable).</label>
+        </div>
+        <div class="criteria-item">
+          <input type="checkbox" class="pc" />
+          <label data-i18n="step2_c4">Work area is clean; no exposed hazards shown in the illustration.</label>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:16px;">
+        <button class="secondary" onclick="checkAgainstCriteria(this)" data-i18n="btn_check">Check against Performance Criteria</button>
+        <div class="score-pill">
+          <span data-i18n="label_score">Score:</span>
+          <span class="score">0%</span>
+        </div>
+      </div>
+
+      <div class="box feedback" style="margin-top:16px;">
+        <div class="loading" data-i18n="feedback_placeholder">Feedback will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <strong data-i18n="footer_copyright">Copyright & Disclaimer</strong><br/>
+    <span data-i18n="footer_text">© 2025 Living Curriculum Prototype | by Husham Jawad Kadhim | Version 1.0 | All rights reserved. This prototype is provided "as is" for educational and demonstration purposes. It may generate inaccurate or incomplete outputs. Users are responsible for validating safety, technical standards, and compliance with local regulations before any real-world application. This tool is not affiliated with, endorsed by, or sponsored by any organization unless explicitly stated.</span>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// TRANSLATION DICTIONARY
+// ============================================================================
+const translations = {
+  en: {
+    title: "Activity Sheet",
+    subtitle: "Living Curriculum Prototype",
+
+    howto_title: "How to use",
+    howto_list: `
+      <li>Read the activity step carefully.</li>
+      <li>Click <b>Generate Illustration</b> to create a visual explanation.</li>
+      <li>If the image is unclear, click <b>Suggest Guidance</b>.</li>
+      <li>Optionally edit the guidance, then click <b>Regenerate with Guidance</b>.</li>
+      <li>When satisfied, click <b>Save Image</b>.</li>
+      <li>Review the image using the <b>Performance Criteria</b>.</li>
+      <li>Use <b>Delete Image</b> or <b>Clear</b> to remove saved outputs.</li>
+      <li>Switch language anytime using the EN / AR buttons.</li>
+    `,
+
+    btn_generate: "Generate Illustration",
+    btn_regenerate: "Regenerate with Guidance",
+    btn_suggest: "Suggest Guidance",
+    btn_save: "Save Image",
+    btn_delete: "Delete Image",
+    btn_clear: "Clear",
+
+    label_guidance: "Guidance (optional):",
+    placeholder_guidance:
+      "Example: show insulated gloves, correct posture, lockout/tagout, electrical panel visible, realistic training environment, no text labels...",
+
+    no_image: "No image generated yet.",
+
+    criteria_title: "Performance Criteria (Self-check)",
+    criteria_subtitle:
+      "Check each item after viewing the illustration and reading the step.",
+
+    label_score: "Score:",
+    btn_check: "Check against Performance Criteria",
+
+    feedback_placeholder: "Feedback will appear here.",
+
+    step1_title: "Step 1: Turn off the main power supply",
+    step1_desc:
+      "Ensure the electrical supply is disconnected before starting work.",
+
+    footer_copyright: "Copyright & Disclaimer",
+    footer_text:
+      "© 2025 Living Curriculum Prototype | by Husham Jawad Kadhim | Version 1.0 | All rights reserved.",
+
+    feedback_good: "✅ Looks good. Proceed to practice.",
+    feedback_partial: "🟡 Partial. Review missing criteria.",
+    feedback_not_ready: "🔴 Not ready. Re-check safety.",
+    feedback_score: "Score:",
+    feedback_missing: "Missing criteria:",
+    feedback_none: "- None",
+    feedback_improvements: "Next improvement:",
+    feedback_suggested:
+      "✅ Suggested guidance added. Use Regenerate with Guidance."
+  },
+
+  ar: {
+  title: "ورقة النشاط",
+  subtitle: "نموذج المنهج الحي",
+
+  howto_title: "طريقة الاستخدام",
+  howto_list: `
+    <li>اقرأ خطوات النشاط بعناية.</li>
+    <li>اضغط <b>توليد صورة</b> لإنشاء توضيح بصري لخطوة النشاط.</li>
+    <li>إذا لم تكن الصورة واضحة، اضغط <b>اقتراح التوجيه</b>.</li>
+    <li>يمكنك تعديل التوجيه ثم الضغط على <b>إعادة التوليد مع التوجيه</b>.</li>
+    <li>عند الرضا عن النتيجة، اضغط <b>حفظ الصورة</b>.</li>
+    <li>راجع الصورة باستخدام <b>معايير الأداء</b>.</li>
+    <li>استخدم <b>استخدم خيار  حذف الصورة</b> <b>أو مسح لإزالة المخرجات المحفوظة</b>.</li>
+    <li>يمكنك تغيير اللغة في أي وقت.</li>
+  `,
+
+  btn_generate: "توليد صورة",
+  btn_regenerate: "إعادة التوليد مع التوجيه",
+  btn_suggest: "اقتراح التوجيه",
+  btn_save: "حفظ الصورة",
+  btn_delete: "حذف الصورة",
+  btn_clear: "مسح",
+
+  label_guidance: "التوجيه (اختياري):",
+  placeholder_guidance: "مثال: إظهار القفازات العازلة، الوضعية الصحيحة، قفل/وضع علامة، لوحة كهربائية مرئية، بيئة تدريب واقعية، بدون تسميات نصية...",
+  no_image: "لم يتم إنشاء صورة بعد.",
+
+  criteria_title: "معايير الأداء (فحص ذاتي)",
+  criteria_subtitle: "تحقق من كل عنصر بعد عرض التوضيح وقراءة الخطوة.",
+  label_score: "النتيجة:",
+  btn_check: "التحقق من معايير الأداء",
+  feedback_placeholder: "ستظهر الملاحظات هنا.",
+
+  step1_title: "الخطوة 1: إيقاف تشغيل مصدر الطاقة الرئيسي",
+  step1_desc: "تأكد من فصل مصدر الطاقة الكهربائية قبل بدء العمل.",
+
+  step1_c1: "تم تأكيد إيقاف الطاقة الرئيسية قبل بدء العمل (السلامة أولاً).",
+  step1_c2: "استخدام معدات الحماية الشخصية الصحيحة (مثل القفازات العازلة) والوضعية الآمنة.",
+  step1_c3: "تحديد القاطع/المفتاح الصحيح (تجنب إيقاف الدائرة الخاطئة).",
+  step1_c4: "المنطقة واللوحة مرئية بوضوح وخالية من المخاطر (لا توجد موصلات مكشوفة).",
+
+  step2_title: "الخطوة 2: تحضير صندوق المقبس والأسلاك",
+  step2_desc: "قم بتجريد الأسلاك وتحضير صندوق المقبس وفقاً للمعايير.",
+  step2_c1: "تم اختيار الأدوات الصحيحة (مثل أداة تجريد الأسلاك) واستخدامها بأمان.",
+  step2_c2: "تم تجريد العزل بالطول المناسب دون إتلاف الموصلات.",
+  step2_c3: "صندوق المقبس في الموضع/مثبت بشكل صحيح (مستوي ومستقر).",
+  step2_c4: "منطقة العمل نظيفة؛ لا توجد مخاطر مكشوفة في التوضيح.",
+
+  footer_copyright: "حقوق النشر وإخلاء المسؤولية",
+  footer_text: "© 2025 نموذج المنهج الحي. بواسطة هشام جواد كاظم. جميع الحقوق محفوظة. يتم توفير هذا النموذج \"كما هو\" لأغراض تعليمية وتوضيحية. قد ينتج مخرجات غير دقيقة أو غير كاملة. المستخدمون مسؤولون عن التحقق من السلامة والمعايير الفنية والامتثال للوائح المحلية قبل أي تطبيق في العالم الحقيقي. هذه الأداة غير تابعة أو معتمدة أو مدعومة من قبل أي منظمة ما لم يُذكر صراحة.",
+
+  feedback_good: "✅ يبدو جيداً. تابع إلى الممارسة مع الإشراف/المعايير.",
+  feedback_partial: "🟡 جزئي. راجع المعايير المفقودة وقم بتحسين التوجيه.",
+  feedback_not_ready: "🔴 غير جاهز. أعد فحص السلامة والإجراء قبل الممارسة.",
+  feedback_score: "النتيجة:",
+  feedback_missing: "المعايير المفقودة:",
+  feedback_none: "- لا شيء",
+  feedback_improvements: "التحسين التالي:",
+  feedback_suggested: "✅ تم إضافة التوجيه المقترح.\nنصيحة: اجعل التوجيه قصيراً (3-5 نقاط) ثم انقر على \"إعادة الإنشاء مع التوجيه\" للحصول على دقة أفضل."
+  }
+};
+
+
+// ============================================================================
+// LANGUAGE SWITCHING
+// ============================================================================
+let currentLang = 'en';
+
+function switchLanguage(lang) {
+  currentLang = lang;
+  const html = document.documentElement;
+  
+  // Update lang attribute and direction
+  html.setAttribute('lang', lang);
+  html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  
+  // Update all elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) {
+      if (key === 'howto_list') {
+  el.innerHTML = translations[lang][key];
+} else {
+  el.textContent = translations[lang][key];
+}
+    }
+  });
+  
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key === 'placeholder_guidance') {
+      el.placeholder = translations[lang].placeholder_guidance;
+    }
+  });
+  
+  // Update active button
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    if (btn.getAttribute('data-lang') === lang) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+// Language toggle event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.getAttribute('data-lang');
+      switchLanguage(lang);
+    });
+  });
+});
+
+// ============================================================================
+// ORIGINAL FUNCTIONALITY (UNCHANGED)
+// ============================================================================
+
+function buildPrompt(stepText, occupation, task, guidanceText) {
+  const base =
+    `realistic vocational training illustration, competency-based training, ` +
+    `${occupation || "technician"} performing task correctly, ` +
+    `task: ${task || ""}, step: ${stepText}, ` +
+    `correct posture and hand positioning, appropriate PPE, safe environment, ` +
+    `clear tools and work area, realistic training workshop or jobsite, ` +
+    `no text, no labels, no watermarks, not cartoon`;
+
+  const guidance = (guidanceText || "").trim();
+  if (!guidance) return base;
+
+  return `${base}, guidance: ${guidance}`;
+}
+
+function pollinationsUrl(prompt) {
+  const seed = Math.floor(Math.random() * 100000);
+  const encoded = encodeURIComponent(prompt);
+  return `https://image.pollinations.ai/prompt/${encoded}?width=896&height=504&seed=${seed}`;
+}
+
+function getStepContext(stepDiv) {
+  return {
+    stepText: stepDiv.innerText,
+    occupation: stepDiv.getAttribute("data-occupation") || "",
+    task: stepDiv.getAttribute("data-task") || "",
+    guidanceEl: stepDiv.querySelector("textarea.guidance"),
+    imgBox: stepDiv.querySelector(".imgwrap"),
+    feedbackBox: stepDiv.querySelector(".feedback"),
+    scoreEl: stepDiv.querySelector(".score")
+  };
+}
+
+function showImage(imgBox, url, onDone) {
+  imgBox.innerHTML = `<div class="loading">${translations[currentLang].no_image.replace('yet', 'generating...')}</div>`;
+
+  const img = new Image();
+  img.src = url;
+  img.style.maxWidth = "100%";
+  img.style.borderRadius = "6px";
+  img.onload = () => {
+    imgBox.innerHTML = "";
+    imgBox.appendChild(img);
+    
+    // Show delete button when image is loaded
+    const stepDiv = imgBox.closest(".step");
+    if (stepDiv) updateDeleteButtonVisibility(stepDiv);
+    
+    if (onDone) onDone(true);
+  };
+  img.onerror = () => {
+    imgBox.innerHTML = `<div class="loading">Failed to generate image. Try again.</div>`;
+    if (onDone) onDone(false);
+  };
+}
+
+function clearOutputs(btn) {
+  const stepDiv = btn.closest(".step");
+  const { imgBox, feedbackBox, scoreEl } = getStepContext(stepDiv);
+
+  // Clear UI
+  imgBox.innerHTML = `<div class="loading" data-i18n="no_image">${translations[currentLang].no_image}</div>`;
+  feedbackBox.innerHTML = `<div class="loading" data-i18n="feedback_placeholder">${translations[currentLang].feedback_placeholder}</div>`;
+  scoreEl.textContent = "0%";
+
+  // Uncheck criteria
+  stepDiv.querySelectorAll("input.pc").forEach(cb => cb.checked = false);
+  
+  // Delete saved image from localStorage
+  const key = stepStorageKey(stepDiv);
+  localStorage.removeItem(key);
+  
+  // Hide delete button
+  updateDeleteButtonVisibility(stepDiv);
+}
+
+function deleteStepImage(btn) {
+  const stepDiv = btn.closest(".step");
+  const { imgBox, feedbackBox } = getStepContext(stepDiv);
+  
+  // Delete from localStorage
+  const key = stepStorageKey(stepDiv);
+  localStorage.removeItem(key);
+  
+  // Clear image from UI
+  imgBox.innerHTML = `<div class="loading" data-i18n="no_image">${translations[currentLang].no_image}</div>`;
+  
+  // Show confirmation feedback
+  const confirmMsg = currentLang === 'ar' ? 'تم حذف الصورة بنجاح.' : '✓ Image deleted successfully.';
+  feedbackBox.innerHTML = `<div class="loading">${confirmMsg}</div>`;
+  
+  // Hide delete button
+  updateDeleteButtonVisibility(stepDiv);
+  
+  // Clear feedback after 2 seconds
+  setTimeout(() => {
+    feedbackBox.innerHTML = `<div class="loading" data-i18n="feedback_placeholder">${translations[currentLang].feedback_placeholder}</div>`;
+  }, 2000);
+}
+
+function updateDeleteButtonVisibility(stepDiv) {
+  const deleteBtn = stepDiv.querySelector(".delete-img-btn");
+  const imgBox = stepDiv.querySelector(".imgwrap");
+  const hasImage = imgBox.querySelector("img") !== null;
+  
+  if (deleteBtn) {
+    deleteBtn.style.display = hasImage ? "inline-block" : "none";
+  }
+}
+
+function generateIllustration(btn) {
+  const stepDiv = btn.closest(".step");
+  const { stepText, occupation, task, guidanceEl, imgBox } = getStepContext(stepDiv);
+
+  btn.disabled = true;
+
+  const prompt = buildPrompt(stepText, occupation, task, "");
+  const url = pollinationsUrl(prompt);
+
+  showImage(imgBox, url, () => {
+    btn.disabled = false;
+  });
+}
+
+function regenerateWithGuidance(btn) {
+  const stepDiv = btn.closest(".step");
+  const { stepText, occupation, task, guidanceEl, imgBox } = getStepContext(stepDiv);
+
+  btn.disabled = true;
+
+  const guidanceText = guidanceEl ? guidanceEl.value : "";
+  const prompt = buildPrompt(stepText, occupation, task, guidanceText);
+  const url = pollinationsUrl(prompt);
+
+  showImage(imgBox, url, () => {
+    btn.disabled = false;
+  });
+}
+
+function checkAgainstCriteria(btn) {
+  const stepDiv = btn.closest(".step");
+  const { stepText, feedbackBox, scoreEl, guidanceEl } = getStepContext(stepDiv);
+
+  const checks = Array.from(stepDiv.querySelectorAll("input.pc"));
+  const total = checks.length;
+  const passed = checks.filter(cb => cb.checked).length;
+  const score = total === 0 ? 0 : Math.round((passed / total) * 100);
+  scoreEl.textContent = `${score}%`;
+
+  const missing = [];
+  checks.forEach((cb, idx) => {
+    if (!cb.checked) {
+      const label = cb.closest(".criteria-item")?.querySelector("label")?.innerText?.trim();
+      if (label) missing.push(`- ${label}`);
+    }
+  });
+
+  const guidance = (guidanceEl?.value || "").trim();
+  const tips = [];
+
+  const s = stepText.toLowerCase();
+
+  if (s.includes("power") || s.includes("breaker") || s.includes("electrical")) {
+    tips.push("Suggestion: Add guidance like 'insulated gloves', 'lockout/tagout', 'stand to the side of the panel', and 'confirm power is OFF'.");
+  }
+  if (s.includes("wire") || s.includes("strip")) {
+    tips.push("Suggestion: Add guidance like 'wire stripper tool visible', 'correct stripping length', and 'no nicked conductors'.");
+  }
+  if (!guidance) {
+    tips.push("Tip: Use 'Regenerate with Guidance' to force key details (tools, PPE, angle, environment).");
+  } else {
+    tips.push("Tip: If the image is still off, simplify guidance to 3–5 clear points (PPE, tool, environment, key action).");
+  }
+
+  const verdict =
+    score >= 80 ? translations[currentLang].feedback_good :
+    score >= 50 ? translations[currentLang].feedback_partial :
+                  translations[currentLang].feedback_not_ready;
+
+  const feedbackText =
+`${verdict}
+
+${translations[currentLang].feedback_score} ${score}% (${passed}/${total})
+
+${translations[currentLang].feedback_missing}
+${missing.length ? missing.join("\n") : translations[currentLang].feedback_none}
+
+${translations[currentLang].feedback_improvements}
+${tips.map(t => `- ${t}`).join("\n")}
+`;
+
+  feedbackBox.textContent = feedbackText;
+}
+
+function suggestGuidance(btn) {
+  const stepDiv = btn.closest(".step");
+  const { stepText, occupation, task, guidanceEl, feedbackBox } = getStepContext(stepDiv);
+
+  const s = (stepText || "").toLowerCase();
+  const t = (task || "").toLowerCase();
+  const o = (occupation || "technician").toLowerCase();
+
+  const base = [
+    `realistic ${o} training environment`,
+    `correct procedure, safety focused`,
+    `clear tools visible`,
+    `correct posture and hand positioning`,
+    `no text, no labels, no watermarks`
+  ];
+
+  const safetyElectrical = [
+    "insulated gloves and safety glasses",
+    "electrical panel/breaker clearly visible",
+    "stand to the side of panel while switching",
+    "lockout/tagout style safety emphasis",
+    "no exposed live conductors shown"
+  ];
+
+  const wiring = [
+    "wire stripper tool clearly visible",
+    "correct stripping length shown",
+    "clean copper strands (no damage)",
+    "socket box mounted level and stable",
+    "neat work area, no sharp hazards"
+  ];
+
+  const mechanical = [
+    "use correct tool (wrench/screwdriver) visible",
+    "safe grip and stable stance",
+    "parts aligned correctly",
+    "workbench/worksite organized"
+  ];
+
+  const ppeGeneral = [
+    "PPE visible (gloves, goggles) as appropriate",
+    "safe environment, hazard-free background"
+  ];
+
+  let picks = [...base];
+
+  if (s.includes("power") || s.includes("breaker") || s.includes("electrical") || t.includes("electrical")) {
+    picks = picks.concat(safetyElectrical);
+  } else if (s.includes("wire") || s.includes("strip") || s.includes("socket") || t.includes("wire") || t.includes("socket")) {
+    picks = picks.concat(wiring);
+  } else if (s.includes("tighten") || s.includes("assemble") || s.includes("install") || t.includes("install") || t.includes("assemble")) {
+    picks = picks.concat(mechanical);
+  } else {
+    picks = picks.concat(ppeGeneral);
+  }
+
+  const final = picks
+    .filter(Boolean)
+    .map(x => x.trim())
+    .filter((x, i, arr) => arr.indexOf(x) === i)
+    .slice(0, 7)
+    .join(", ");
+
+  if (guidanceEl) {
+    guidanceEl.value = final;
+    guidanceEl.focus();
+  }
+
+  if (feedbackBox) {
+    feedbackBox.textContent = translations[currentLang].feedback_suggested;
+  }
+}
+
+function stepStorageKey(stepDiv) {
+   const task = stepDiv.getAttribute("data-task") || "step";
+  return "saved_image_" + task.replace(/\s+/g, "_").toLowerCase();
+}
+
+function saveStepImage(btn) {
+  const stepDiv = btn.closest(".step");
+  const img = stepDiv.querySelector(".imgwrap img");
+
+  if (!img || !img.src) {
+    alert("No image to save yet.");
+    return;
+  }
+
+  const key = stepStorageKey(stepDiv);
+  localStorage.setItem(key, img.src);
+
+  alert("Image saved for this step.");
+  
+  // Ensure delete button is visible after saving
+  updateDeleteButtonVisibility(stepDiv);
+}
+
+function loadSavedImages() {
+  document.querySelectorAll(".step").forEach(stepDiv => {
+    const key = stepStorageKey(stepDiv);
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const imgBox = stepDiv.querySelector(".imgwrap");
+      imgBox.innerHTML = "";
+      const img = new Image();
+      img.src = saved;
+      img.style.maxWidth = "100%";
+      img.style.borderRadius = "6px";
+      imgBox.appendChild(img);
+      
+      // Show delete button for saved images
+      updateDeleteButtonVisibility(stepDiv);
+    }
+  });
+}
+
+window.addEventListener("DOMContentLoaded", loadSavedImages);
+
+</script>
+</body>
+</html>
