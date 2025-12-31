@@ -505,6 +505,9 @@ const translations = {
     btn_save: "Save Image",
     btn_delete: "Delete Image",
     btn_clear: "Clear",
+loading_generate: "⏳ Generating illustration, please wait...",
+loading_regenerate: "⏳ Regenerating illustration with guidance...",
+loading_hint: "This may take a few seconds.",
 
     label_guidance: "Guidance (optional):",
     placeholder_guidance:
@@ -574,6 +577,9 @@ step2_c4: "Work area is clean; no exposed hazards shown in the illustration.",
   btn_save: "حفظ الصورة",
   btn_delete: "حذف الصورة",
   btn_clear: "مسح",
+loading_generate: "⏳ جارٍ توليد التوضيح، يرجى الانتظار...",
+loading_regenerate: "⏳ جارٍ إعادة التوليد باستخدام التوجيه...",
+loading_hint: "قد تستغرق العملية بضع ثوانٍ.",
 
   label_guidance: "التوجيه (اختياري):",
   placeholder_guidance: "مثال: إظهار القفازات العازلة، الوضعية الصحيحة، قفل/وضع علامة، لوحة كهربائية مرئية، بيئة تدريب واقعية، بدون تسميات نصية...",
@@ -707,8 +713,18 @@ function getStepContext(stepDiv) {
   };
 }
 
-function showImage(imgBox, url, onDone) {
-  imgBox.innerHTML = `<div class="loading">${translations[currentLang].no_image.replace('yet', 'generating...')}</div>`;
+function showImage(imgBox, url, onDone, mode = 'generate') {
+  const msg =
+    mode === 'regenerate'
+      ? translations[currentLang].loading_regenerate
+      : translations[currentLang].loading_generate;
+
+  imgBox.innerHTML = `
+    <div class="loading">
+      ${msg}<br/>
+      <small>${translations[currentLang].loading_hint}</small>
+    </div>
+  `;
 
   const img = new Image();
   img.src = url;
@@ -793,9 +809,9 @@ function generateIllustration(btn) {
   const prompt = buildPrompt(stepText, occupation, task, "");
   const url = pollinationsUrl(prompt);
 
-  showImage(imgBox, url, () => {
-    btn.disabled = false;
-  });
+showImage(imgBox, url, () => {
+  btn.disabled = false;
+}, 'generate');
 }
 
 function regenerateWithGuidance(btn) {
@@ -808,11 +824,10 @@ function regenerateWithGuidance(btn) {
   const prompt = buildPrompt(stepText, occupation, task, guidanceText);
   const url = pollinationsUrl(prompt);
 
-  showImage(imgBox, url, () => {
-    btn.disabled = false;
-  });
+showImage(imgBox, url, () => {
+  btn.disabled = false;
+}, 'regenerate');
 }
-
 function checkAgainstCriteria(btn) {
   const stepDiv = btn.closest(".step");
   const { stepText, feedbackBox, scoreEl, guidanceEl } = getStepContext(stepDiv);
